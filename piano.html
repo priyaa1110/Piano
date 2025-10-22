@@ -188,6 +188,42 @@ body {
   display: none;
 }
 
+.octave-control {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.octave-btn {
+  width: 32px;
+  height: 32px;
+  background: #3f3f46;
+  border: none;
+  border-radius: 6px;
+  color: #fafafa;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.octave-btn:hover {
+  background: #52525b;
+}
+
+.octave-btn:active {
+  background: #27272a;
+}
+
+.octave-display {
+  font-size: 0.875rem;
+  color: #a1a1aa;
+  min-width: 20px;
+  text-align: center;
+}
+
 @media (max-width: 768px) {
   .container {
     padding: 1rem;
@@ -243,6 +279,14 @@ body {
         <label>Show Keys</label>
         <div class="toggle active"></div>
       </div>
+      <div class="control-group">
+        <label>Octave</label>
+        <div class="octave-control">
+          <button class="octave-btn" id="octaveDown">−</button>
+          <span class="octave-display" id="octaveDisplay">0</span>
+          <button class="octave-btn" id="octaveUp">+</button>
+        </div>
+      </div>
     </div>
   </div>
   
@@ -275,6 +319,7 @@ const toggle = document.querySelector('.toggle');
 let audioContext;
 let volume = 0.5;
 let showKeys = true;
+let octaveShift = 0;
 
 function initAudio() {
   if (!audioContext) {
@@ -291,7 +336,8 @@ function playNote(frequency) {
   oscillator.connect(gainNode);
   gainNode.connect(audioContext.destination);
   
-  oscillator.frequency.value = frequency;
+  const shiftedFreq = frequency * Math.pow(2, octaveShift);
+  oscillator.frequency.value = shiftedFreq;
   oscillator.type = 'sine';
   
   gainNode.gain.setValueAtTime(volume, audioContext.currentTime);
@@ -372,6 +418,24 @@ toggle.addEventListener('click', () => {
       key.classList.add('hide');
     }
   });
+});
+
+const octaveUp = document.getElementById('octaveUp');
+const octaveDown = document.getElementById('octaveDown');
+const octaveDisplay = document.getElementById('octaveDisplay');
+
+octaveUp.addEventListener('click', () => {
+  if (octaveShift < 2) {
+    octaveShift++;
+    octaveDisplay.textContent = octaveShift > 0 ? `+${octaveShift}` : octaveShift;
+  }
+});
+
+octaveDown.addEventListener('click', () => {
+  if (octaveShift > -2) {
+    octaveShift--;
+    octaveDisplay.textContent = octaveShift > 0 ? `+${octaveShift}` : octaveShift;
+  }
 });
 
 createKeys();
